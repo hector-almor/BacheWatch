@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.loswachabaches.bachewatch.R
+import androidx.compose.ui.text.input.VisualTransformation
 
 @Composable
 fun LoginScreen(
@@ -56,7 +57,7 @@ fun LoginScreen(
 
     var usuario by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
+    var verPassword by remember { mutableStateOf(false) }
     val correoValido = Patterns.EMAIL_ADDRESS
         .matcher(usuario)
         .matches()
@@ -70,6 +71,7 @@ fun LoginScreen(
             1.0f to amarillo
         )
     )
+
 
     Scaffold(
         containerColor = negro
@@ -168,7 +170,22 @@ fun LoginScreen(
                     Text("Contraseña")
                 },
                 singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (verPassword) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
+                trailingIcon = {
+                    TextButton(
+                        onClick = { verPassword = !verPassword }
+                    ) {
+                        Text(
+                            text = if (verPassword) "Ocultar" else "Ver",
+                            color = amarillo,
+                            fontSize = 12.sp
+                        )
+                    }
+                },
                 shape = RoundedCornerShape(14.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = blanco,
@@ -215,18 +232,6 @@ fun LoginScreen(
                     text = "Iniciar sesión",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            TextButton(
-                onClick = onChangePasswordClick
-            ) {
-                Text(
-                    text = "Cambiar contraseña",
-                    color = blanco,
-                    fontSize = 14.sp
                 )
             }
         }
