@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.loswachabaches.bachewatch.ui.screens.login.LoginScreen
+import com.loswachabaches.bachewatch.ui.navigation.AppNavigation
 import com.loswachabaches.bachewatch.ui.theme.BacheWatchTheme
 
 class MainActivity : ComponentActivity() {
@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             BacheWatchTheme {
-                LoginScreen()
+                AppNavigation()
             }
         }
     }

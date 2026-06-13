@@ -1,14 +1,18 @@
 package com.loswachabaches.bachewatch.ui.screens.login
 
 import android.util.Patterns
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -27,26 +31,38 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.loswachabaches.bachewatch.R
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    onLoginClick: () -> Unit = {},
+    onRegisterClick: () -> Unit = {},
+    onChangePasswordClick: () -> Unit = {}
+) {
     // Colores
     val negro = Color(0xFF0B0B0B)
     val amarillo = Color(0xFFFFDA25)
     val blanco = Color(0xFFFFFFFF)
     val gris = Color(0xFF4B4A4A)
     val rojo = Color(0xFFFF4D4D)
-    var usuario by remember { mutableStateOf("") } //Aqui los valores de firebase
+
+    var usuario by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
     val correoValido = Patterns.EMAIL_ADDRESS
         .matcher(usuario)
         .matches()
+
     val usuarioTieneError = usuario.isNotBlank() && !correoValido
+
     val backgroundGrad = Brush.verticalGradient(
         colorStops = arrayOf(
             0.0f to negro,
@@ -58,6 +74,7 @@ fun LoginScreen() {
     Scaffold(
         containerColor = negro
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -70,13 +87,29 @@ fun LoginScreen() {
 
             Spacer(modifier = Modifier.height(80.dp))
 
-            Text(
-                text = "Aquí va el icono de BacheWatch",
-                color = amarillo,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 45.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 45.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.bachewatch_logo),
+                    contentDescription = "Logo BacheWatch",
+                    modifier = Modifier.size(90.dp),
+                    contentScale = ContentScale.Fit
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Image(
+                    painter = painterResource(id = R.drawable.logo_largo),
+                    contentDescription = "Nombre BacheWatch",
+                    modifier = Modifier.size(width = 160.dp, height = 90.dp),
+                    contentScale = ContentScale.Fit
+                )
+            }
 
             Spacer(modifier = Modifier.height(70.dp))
 
@@ -151,24 +184,25 @@ fun LoginScreen() {
             Spacer(modifier = Modifier.height(8.dp))
 
             TextButton(
-                onClick = {},
+                onClick = onRegisterClick,
                 modifier = Modifier.align(Alignment.End)
             ) {
                 Text(
-                    text = "¿Olvidaste tu contraseña?",
+                    text = "¿No tienes cuenta?, Regístrate aquí",
                     color = amarillo,
-                    fontSize = 13.sp
+                    fontSize = 13.sp,
+                    textDecoration = TextDecoration.Underline
                 )
             }
 
             Spacer(modifier = Modifier.height(22.dp))
 
             Button(
-                onClick = {},
+                onClick = onLoginClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
-                enabled = correoValido && password.isNotBlank(),
+                enabled = true,
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = amarillo,
@@ -187,7 +221,7 @@ fun LoginScreen() {
             Spacer(modifier = Modifier.height(12.dp))
 
             TextButton(
-                onClick = {}
+                onClick = onChangePasswordClick
             ) {
                 Text(
                     text = "Cambiar contraseña",
