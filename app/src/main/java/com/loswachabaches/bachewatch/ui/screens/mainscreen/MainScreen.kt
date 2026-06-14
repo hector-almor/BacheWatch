@@ -62,6 +62,7 @@ private enum class Tab {
 
 @Composable
 fun MainScreen(
+    onLogoutClick: () -> Unit = {},
     onAddClick: () -> Unit = {}
 ) {
     var activeTab by remember { mutableStateOf(Tab.MAPA) }
@@ -105,9 +106,14 @@ fun MainScreen(
         ) {
             when (activeTab) {
                 Tab.MAPA -> MapaTab()
+
                 Tab.ESTADISTICAS -> EstadisticasTab()
+
                 Tab.MIS_REPORTES -> MisReportesTab()
-                Tab.MI_CUENTA -> MiCuentaTab()
+
+                Tab.MI_CUENTA -> MiCuentaTab(
+                    onLogoutClick = onLogoutClick
+                )
             }
         }
     }

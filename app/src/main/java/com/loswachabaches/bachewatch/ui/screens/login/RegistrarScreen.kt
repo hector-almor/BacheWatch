@@ -56,8 +56,8 @@ data class RegisterUserData(
 
 @Composable
 fun RegisterScreen(
-    onLoginClick: () -> Unit = {},
-    onRegisterClick: (RegisterUserData) -> Unit = {}
+    onRegisterClick: (RegisterUserData) -> Unit = {},
+    onLoginClick: () -> Unit = {}
 ) {
     val negro = Color(0xFF0B0B0B)
     val amarillo = Color(0xFFFFDA25)
@@ -323,6 +323,8 @@ fun RegisterScreen(
                             password = password
                         )
                     )
+
+                    onLoginClick()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
