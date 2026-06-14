@@ -5,13 +5,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.loswachabaches.bachewatch.ui.screens.login.LoginScreen
-import com.loswachabaches.bachewatch.ui.screens.login.RegisterScreen
 import com.loswachabaches.bachewatch.ui.screens.mainscreen.MainScreen
+import com.loswachabaches.bachewatch.ui.screens.registrarbache.RegistrarBacheScreen
 
 object Routes {
     const val LOGIN = "login"
-    const val REGISTER = "register"
     const val MAIN = "main"
+    const val REGISTRAR_BACHE = "registrar_bache"
 }
 
 @Composable
@@ -22,31 +22,39 @@ fun AppNavigation() {
         navController = navController,
         startDestination = Routes.LOGIN
     ) {
-        composable(route = Routes.LOGIN) {
+        composable(Routes.LOGIN) {
             LoginScreen(
                 onLoginClick = {
                     navController.navigate(Routes.MAIN) {
-                        launchSingleTop = true
-                    }
-                },
-                onRegisterClick = {
-                    navController.navigate(Routes.REGISTER) {
+                        popUpTo(Routes.LOGIN) {
+                            inclusive = true
+                        }
                         launchSingleTop = true
                     }
                 }
             )
         }
 
-        composable(route = Routes.REGISTER) {
-            RegisterScreen(
-                onLoginClick = {
+        composable(Routes.MAIN) {
+            MainScreen(
+                onAddClick = {
+                    navController.navigate(Routes.REGISTRAR_BACHE)
+                }
+            )
+        }
+
+        composable(Routes.REGISTRAR_BACHE) {
+            RegistrarBacheScreen(
+                onCancelClick = {
+                    navController.popBackStack()
+                },
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onSaveClick = { _, _ ->
                     navController.popBackStack()
                 }
             )
-        }
-
-        composable(route = Routes.MAIN) {
-            MainScreen()
         }
     }
 }

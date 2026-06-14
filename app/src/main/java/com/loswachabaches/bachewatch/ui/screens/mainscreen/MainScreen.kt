@@ -3,6 +3,7 @@ package com.loswachabaches.bachewatch.ui.screens.mainscreen
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -60,7 +61,9 @@ private enum class Tab {
 }
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onAddClick: () -> Unit = {}
+) {
     var activeTab by remember { mutableStateOf(Tab.MAPA) }
 
     Scaffold(
@@ -76,9 +79,7 @@ fun MainScreen() {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {
-                    // TODO: navegar a pantalla de nuevo reporte
-                },
+                onClick = onAddClick,
                 modifier = Modifier.offset(y = 42.dp),
                 shape = CircleShape,
                 containerColor = AccentColor,
@@ -97,7 +98,7 @@ fun MainScreen() {
         floatingActionButtonPosition = FabPosition.Center
     ) { innerPadding ->
 
-        androidx.compose.foundation.layout.Box(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
