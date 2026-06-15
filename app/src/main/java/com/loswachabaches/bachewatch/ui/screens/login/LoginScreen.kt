@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -41,12 +42,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.loswachabaches.bachewatch.R
 import androidx.compose.ui.text.input.VisualTransformation
+import com.loswachabaches.bachewatch.ui.viewmodels.AuthUiState
 
 @Composable
 fun LoginScreen(
-    onLoginClick: () -> Unit = {},
+    uiState: AuthUiState = AuthUiState.Idle,
+    onLoginClick: (correo: String, password: String) -> Unit = { _, _ -> },
     onRegisterClick: () -> Unit = {},
-    onChangePasswordClick: () -> Unit = {}
+    // onChangePasswordClick: () -> Unit = {}
 ) {
     // Colores
     val negro = Color(0xFF0B0B0B)
@@ -215,11 +218,11 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(22.dp))
 
             Button(
-                onClick = onLoginClick,
+                onClick = { onLoginClick(usuario, password) },
+                enabled = correoValido && password.isNotBlank() && uiState !is AuthUiState.Cargando,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
-                enabled = true,
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = amarillo,
@@ -228,10 +231,27 @@ fun LoginScreen(
                     disabledContentColor = blanco.copy(alpha = 0.60f)
                 )
             ) {
+                if (uiState is AuthUiState.Cargando) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = negro,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = "Iniciar sesión",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            if (uiState is AuthUiState.Error) {
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Iniciar sesión",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    text = (uiState as AuthUiState.Error).mensaje,
+                    color = rojo,
+                    fontSize = 13.sp
                 )
             }
         }

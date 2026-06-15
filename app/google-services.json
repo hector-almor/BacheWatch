@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "175600384461",
+    "project_id": "bachewatch-cf",
+    "storage_bucket": "bachewatch-cf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:175600384461:android:27b64233892e1c62ad2c84",
+        "android_client_info": {
+          "package_name": "com.loswachabaches.bachewatch"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCYdJhzE5mHd_el2dwoOZWJ6X_UREqa4sM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

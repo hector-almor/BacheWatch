@@ -52,6 +52,7 @@ import com.loswachabaches.bachewatch.ui.screens.mainscreen.tabs.EstadisticasTab
 import com.loswachabaches.bachewatch.ui.screens.mainscreen.tabs.MapaTab
 import com.loswachabaches.bachewatch.ui.screens.mainscreen.tabs.MiCuentaTab
 import com.loswachabaches.bachewatch.ui.screens.mainscreen.tabs.MisReportesTab
+import com.loswachabaches.bachewatch.ui.viewmodels.AuthViewModel
 
 private enum class Tab {
     MAPA,
@@ -62,6 +63,7 @@ private enum class Tab {
 
 @Composable
 fun MainScreen(
+    authViewModel: AuthViewModel,
     onLogoutClick: () -> Unit = {},
     onAddClick: () -> Unit = {}
 ) {
@@ -112,6 +114,7 @@ fun MainScreen(
                 Tab.MIS_REPORTES -> MisReportesTab()
 
                 Tab.MI_CUENTA -> MiCuentaTab(
+                    authViewModel = authViewModel,
                     onLogoutClick = onLogoutClick
                 )
             }

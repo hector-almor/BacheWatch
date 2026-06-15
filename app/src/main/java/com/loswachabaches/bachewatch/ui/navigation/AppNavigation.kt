@@ -1,6 +1,10 @@
 package com.loswachabaches.bachewatch.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -8,6 +12,8 @@ import com.loswachabaches.bachewatch.ui.screens.login.LoginScreen
 import com.loswachabaches.bachewatch.ui.screens.login.RegisterScreen
 import com.loswachabaches.bachewatch.ui.screens.mainscreen.MainScreen
 import com.loswachabaches.bachewatch.ui.screens.registrarbache.RegistrarBacheScreen
+import com.loswachabaches.bachewatch.ui.viewmodels.AuthUiState
+import com.loswachabaches.bachewatch.ui.viewmodels.AuthViewModel
 
 object Routes {
     const val LOGIN = "login"
@@ -19,20 +25,19 @@ object Routes {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    // Que se comparta con otras pantallas
+    val authViewModel: AuthViewModel = viewModel()
 
     NavHost(
         navController = navController,
         startDestination = Routes.LOGIN
     ) {
         composable(route = Routes.LOGIN) {
+            val uiState by authViewModel.uiState.collectAsState()
             LoginScreen(
-                onLoginClick = {
-                    navController.navigate(Routes.MAIN) {
-                        popUpTo(Routes.LOGIN) {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
+                uiState = uiState,
+                onLoginClick = { correo, password ->
+                    authViewModel.login(correo, password)
                 },
                 onRegisterClick = {
                     navController.navigate(Routes.REGISTER) {
@@ -40,32 +45,51 @@ fun AppNavigation() {
                     }
                 }
             )
+            LaunchedEffect(uiState) {
+                if (uiState is AuthUiState.Exito) {
+                    navController.navigate(Routes.MAIN) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            }
         }
 
 
         composable(route = Routes.REGISTER) {
+            val uiState by authViewModel.uiState.collectAsState()
+
             RegisterScreen(
+                uiState = uiState,
                 onRegisterClick = { userData ->
-                    // Aquí después puedes guardar el usuario
+                    authViewModel.registrar(userData.nombre, userData.correo, userData.password)
                 },
                 onLoginClick = {
                     navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.REGISTER) {
-                            inclusive = true
-                        }
+                        popUpTo(Routes.REGISTER) { inclusive = true }
                         launchSingleTop = true
                     }
                 }
             )
+            LaunchedEffect(uiState) {
+                if (uiState is AuthUiState.Exito) {
+                    navController.navigate(Routes.MAIN) {
+                        popUpTo(Routes.REGISTER) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            }
         }
 
 
         composable(route = Routes.MAIN) {
             MainScreen(
+                authViewModel = authViewModel,
                 onAddClick = {
                     navController.navigate(Routes.REGISTRAR_BACHE)
                 },
                 onLogoutClick = {
+                    authViewModel.logout()
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.MAIN) {
                             inclusive = true

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -43,19 +45,21 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.loswachabaches.bachewatch.R
+import com.loswachabaches.bachewatch.ui.viewmodels.AuthUiState
 
 data class RegisterUserData(
     val nombre: String,
-    val apellidoPaterno: String,
-    val apellidoMaterno: String,
-    val ciudad: String,
-    val telefono: String,
+    // val apellidoPaterno: String,
+    // val apellidoMaterno: String,
+    // val ciudad: String,
+    // val telefono: String,
     val correo: String,
     val password: String
 )
 
 @Composable
 fun RegisterScreen(
+    uiState: AuthUiState = AuthUiState.Idle,
     onRegisterClick: (RegisterUserData) -> Unit = {},
     onLoginClick: () -> Unit = {}
 ) {
@@ -66,10 +70,10 @@ fun RegisterScreen(
     val rojo = Color(0xFFFF4D4D)
 
     var nombre by remember { mutableStateOf("") }
-    var apellidoPaterno by remember { mutableStateOf("") }
-    var apellidoMaterno by remember { mutableStateOf("") }
-    var ciudad by remember { mutableStateOf("") }
-    var telefono by remember { mutableStateOf("") }
+    // var apellidoPaterno by remember { mutableStateOf("") }
+    // var apellidoMaterno by remember { mutableStateOf("") }
+    // var ciudad by remember { mutableStateOf("") }
+    // var telefono by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var repetirPassword by remember { mutableStateOf("") }
@@ -78,12 +82,12 @@ fun RegisterScreen(
     var verRepetirPassword by remember { mutableStateOf(false) }
 
     val nombreTieneError = nombre.isNotBlank() && nombre.trim().length < 2
-    val apellidoPaternoTieneError =
-        apellidoPaterno.isNotBlank() && apellidoPaterno.trim().length < 2
-    val ciudadTieneError = ciudad.isNotBlank() && ciudad.trim().length < 2
+   // val apellidoPaternoTieneError =
+   //     apellidoPaterno.isNotBlank() && apellidoPaterno.trim().length < 2
+   // val ciudadTieneError = ciudad.isNotBlank() && ciudad.trim().length < 2
 
-    val telefonoTieneError =
-        telefono.isNotBlank() && telefono.length != 10
+   // val telefonoTieneError =
+   //     telefono.isNotBlank() && telefono.length != 10
 
     val correoValido = Patterns.EMAIL_ADDRESS
         .matcher(correo.trim())
@@ -99,9 +103,9 @@ fun RegisterScreen(
 
     val puedeRegistrarse =
         nombre.trim().length >= 2 &&
-                apellidoPaterno.trim().length >= 2 &&
-                ciudad.trim().length >= 2 &&
-                telefono.length == 10 &&
+                // apellidoPaterno.trim().length >= 2 &&
+                // ciudad.trim().length >= 2 &&
+                // telefono.length == 10 &&
                 correoValido &&
                 password.length >= 6 &&
                 repetirPassword == password
@@ -179,6 +183,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Apellidos en par
+            /*
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -208,8 +213,10 @@ fun RegisterScreen(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+            */
 
             // Ciudad y teléfono en par
+           /*
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -244,6 +251,7 @@ fun RegisterScreen(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+            */
 
             // Correo
             RegisterTextField(
@@ -315,21 +323,21 @@ fun RegisterScreen(
                     onRegisterClick(
                         RegisterUserData(
                             nombre = nombre.trim(),
-                            apellidoPaterno = apellidoPaterno.trim(),
-                            apellidoMaterno = apellidoMaterno.trim(),
-                            ciudad = ciudad.trim(),
-                            telefono = telefono.trim(),
+                            // apellidoPaterno = apellidoPaterno.trim(),
+                            // apellidoMaterno = apellidoMaterno.trim(),
+                            // ciudad = ciudad.trim(),
+                            // telefono = telefono.trim(),
                             correo = correo.trim(),
                             password = password
                         )
                     )
-
-                    onLoginClick()
+                    // onLoginClick()
                 },
+                enabled = puedeRegistrarse && uiState !is AuthUiState.Cargando,
+
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
-                enabled = true,
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = amarillo,
@@ -338,11 +346,19 @@ fun RegisterScreen(
                     disabledContentColor = blanco.copy(alpha = 0.60f)
                 )
             ) {
-                Text(
-                    text = "Registrarse",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                if (uiState is AuthUiState.Cargando) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = negro,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = "Registrarse",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -383,7 +399,9 @@ private fun RegisterTextField(
         onValueChange = onValueChange,
         modifier = modifier
             .fillMaxWidth()
-            .height(if (isError) 78.dp else 62.dp),
+            .fillMaxWidth(),
+            // .height(if (isError) 78.dp else 62.dp), lo comento porque hace que el campo de nombre se achique -_-
+
         label = {
             Text(label)
         },
