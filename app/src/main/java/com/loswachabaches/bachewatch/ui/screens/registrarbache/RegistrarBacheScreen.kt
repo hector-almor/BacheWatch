@@ -30,6 +30,7 @@ import androidx.tv.material3.OutlinedButtonDefaults
 import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.loswachabaches.bachewatch.ui.viewmodels.ReporteUiState
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -54,9 +55,10 @@ private val CDMX = GeoPoint(19.4326, -99.1332)
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun RegistrarBacheScreen(
+    uiState: ReporteUiState = ReporteUiState.Idle,
     onCancelClick: () -> Unit = {},
     onBackClick: () -> Unit = {},
-    onSaveClick: (photoUri: Uri?, location: GeoPoint?) -> Unit = { _, _ -> }
+    onSaveClick: (photoUri: Uri?, location: GeoPoint?, descripcion: String) -> Unit = { _, _, _ -> }
 ) {
     val context = LocalContext.current
 
@@ -68,6 +70,9 @@ fun RegistrarBacheScreen(
     var savedLocation    by remember { mutableStateOf<GeoPoint?>(null) }
     var locationOverlay  by remember { mutableStateOf<MyLocationNewOverlay?>(null) }
     var locationLabel    by remember { mutableStateOf("Obteniendo ubicación…") }
+
+    // Había faltado la descripción xd
+    var descripcion by remember { mutableStateOf("") }
 
     // Fecha/hora en tiempo real
     var currentDateTime by remember { mutableStateOf("") }
@@ -127,7 +132,8 @@ fun RegistrarBacheScreen(
         bottomBar = {
             BottomActions(
                 onCancelClick = onCancelClick,
-                onSaveClick   = { onSaveClick(photoUri, savedLocation) }
+                onSaveClick   = { onSaveClick(photoUri, savedLocation,descripcion) },
+                uiState = uiState
             )
         }
     ) { padding ->
@@ -159,6 +165,28 @@ fun RegistrarBacheScreen(
                     if (permissions.allPermissionsGranted) openCamera()
                     else permissions.launchMultiplePermissionRequest()
                 }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ── Descripción ───────────────────────────────────────────────────────────
+            SectionTitle(text = "Descripción", icon = Icons.Outlined.EditNote)
+            Spacer(modifier = Modifier.height(10.dp))
+
+            OutlinedTextField(
+                value = descripcion,
+                onValueChange = { descripcion = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Describe el bache") },
+                minLines = 3,
+                maxLines = 5,
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Accent,
+                    unfocusedBorderColor = BorderColor,
+                    focusedLabelColor = Accent,
+                    cursorColor = Accent
+                )
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -346,7 +374,11 @@ private fun SectionTitle(text: String, icon: ImageVector) {
 
 // ─── Bottom actions ───────────────────────────────────────────────────────────
 @Composable
-private fun BottomActions(onCancelClick: () -> Unit, onSaveClick: () -> Unit) {
+private fun BottomActions(
+    onCancelClick: () -> Unit,
+    onSaveClick: () -> Unit,
+    uiState: ReporteUiState = ReporteUiState.Idle
+) {
     Surface(
         modifier        = Modifier.fillMaxWidth().navigationBarsPadding(),
         color           = Surface,
@@ -372,13 +404,26 @@ private fun BottomActions(onCancelClick: () -> Unit, onSaveClick: () -> Unit) {
             }
             Button(
                 onClick  = onSaveClick,
+                enabled = uiState !is ReporteUiState.Cargando,
                 modifier = Modifier.weight(1f).height(50.dp),
                 shape    = RoundedCornerShape(16.dp),
                 colors   = ButtonDefaults.buttonColors(containerColor = Accent, contentColor = Primary)
             ) {
-                Icon(Icons.Outlined.Save, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.size(6.dp))
-                Text("Guardar", fontWeight = FontWeight.Bold)
+                if (uiState is ReporteUiState.Cargando) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Primary,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        Icons.Outlined.Save,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.size(6.dp))
+                    Text("Guardar", fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

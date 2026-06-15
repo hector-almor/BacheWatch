@@ -14,6 +14,8 @@ import com.loswachabaches.bachewatch.ui.screens.mainscreen.MainScreen
 import com.loswachabaches.bachewatch.ui.screens.registrarbache.RegistrarBacheScreen
 import com.loswachabaches.bachewatch.ui.viewmodels.AuthUiState
 import com.loswachabaches.bachewatch.ui.viewmodels.AuthViewModel
+import com.loswachabaches.bachewatch.ui.viewmodels.ReporteUiState
+import com.loswachabaches.bachewatch.ui.viewmodels.ReporteViewModel
 
 object Routes {
     const val LOGIN = "login"
@@ -27,6 +29,7 @@ fun AppNavigation() {
     val navController = rememberNavController()
     // Que se comparta con otras pantallas
     val authViewModel: AuthViewModel = viewModel()
+    val reporteViewModel: ReporteViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -85,6 +88,7 @@ fun AppNavigation() {
         composable(route = Routes.MAIN) {
             MainScreen(
                 authViewModel = authViewModel,
+                reporteViewModel = reporteViewModel,
                 onAddClick = {
                     navController.navigate(Routes.REGISTRAR_BACHE)
                 },
@@ -101,17 +105,36 @@ fun AppNavigation() {
         }
 
         composable(route = Routes.REGISTRAR_BACHE) {
+            val uiState by reporteViewModel.uiState.collectAsState()
+
             RegistrarBacheScreen(
+                uiState = uiState,
                 onCancelClick = {
                     navController.popBackStack()
                 },
                 onBackClick = {
                     navController.popBackStack()
                 },
-                onSaveClick = { _, _ ->
-                    navController.popBackStack()
+                onSaveClick = { photoUri, location, descripcion ->
+                    val uid = authViewModel.obtenerUsuarioActual()?.uid ?: return@RegistrarBacheScreen
+                    if (photoUri != null && location != null) {
+                        reporteViewModel.crearReporte(
+                            usuarioId = uid,
+                            descripcion = descripcion,
+                            latitud = location.latitude,
+                            longitud = location.longitude,
+                            direccionAproximada = "",
+                            fotoUri = photoUri
+                        )
+                    }
                 }
             )
+            LaunchedEffect(uiState) {
+                if (uiState is ReporteUiState.Exito) {
+                    reporteViewModel.resetUiState()
+                    navController.popBackStack()
+                }
+            }
         }
     }
 }

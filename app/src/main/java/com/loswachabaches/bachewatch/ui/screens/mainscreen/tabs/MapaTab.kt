@@ -19,6 +19,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,11 +32,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.loswachabaches.bachewatch.ui.screens.mainscreen.PrimaryColor
 import com.loswachabaches.bachewatch.ui.screens.mainscreen.SurfaceColor
+import com.loswachabaches.bachewatch.ui.viewmodels.ReporteViewModel
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
@@ -44,8 +47,13 @@ private val CDMX = GeoPoint(19.4326, -99.1332)
 
 @SuppressLint("MissingPermission")
 @Composable
-fun MapaTab() {
+fun MapaTab(reporteViewModel: ReporteViewModel) {
     val context = LocalContext.current
+
+    val reportes by reporteViewModel.reportes.collectAsState()
+    LaunchedEffect(Unit) {
+        reporteViewModel.obtenerTodosLosReportes()
+    }
 
     var mapView by remember { mutableStateOf<MapView?>(null) }
     var locationOverlay by remember { mutableStateOf<MyLocationNewOverlay?>(null) }
@@ -106,6 +114,27 @@ fun MapaTab() {
             mapView?.onPause()
             mapView?.onDetach()
         }
+    }
+
+    LaunchedEffect(reportes) {
+        val map = mapView ?: return@LaunchedEffect
+
+        // Limpiar marcadores anteriores conservando el overlay de ubicación
+        map.overlays.removeIf { it is Marker }
+
+        // Agregar un marcador por cada reporte
+        reportes.forEach { reporte ->
+            val marker = Marker(map).apply {
+                position = GeoPoint(reporte.latitud, reporte.longitud)
+                title = reporte.descripcion
+                snippet = reporte.direccionAproximada.ifEmpty { "Sin dirección" }
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                infoWindow = BacheInfoWindow(map)
+            }
+            map.overlays.add(marker)
+        }
+
+        map.invalidate() // refresca el mapa
     }
 
     Box(
