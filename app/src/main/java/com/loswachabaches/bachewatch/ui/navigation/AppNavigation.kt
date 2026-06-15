@@ -56,6 +56,9 @@ fun AppNavigation() {
             )
             LaunchedEffect(uiState) {
                 if (uiState is AuthUiState.Exito) {
+                    authViewModel.obtenerUsuarioActual()?.uid?.let {
+                        authViewModel.obtenerDatosUsuario(it)
+                    }
                     navController.navigate(Routes.MAIN) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                         launchSingleTop = true
@@ -82,6 +85,9 @@ fun AppNavigation() {
             )
             LaunchedEffect(uiState) {
                 if (uiState is AuthUiState.Exito) {
+                    authViewModel.obtenerUsuarioActual()?.uid?.let {
+                        authViewModel.obtenerDatosUsuario(it) // <- agregar
+                    }
                     navController.navigate(Routes.MAIN) {
                         popUpTo(Routes.REGISTER) { inclusive = true }
                         launchSingleTop = true
@@ -115,6 +121,7 @@ fun AppNavigation() {
 
         composable(route = Routes.REGISTRAR_BACHE) {
             val uiState by reporteViewModel.uiState.collectAsState()
+            val usuario by authViewModel.usuario.collectAsState()
 
             RegistrarBacheScreen(
                 uiState = uiState,
@@ -126,6 +133,7 @@ fun AppNavigation() {
                 },
                 onSaveClick = { photoUri, location, descripcion ->
                     val uid = authViewModel.obtenerUsuarioActual()?.uid ?: return@RegistrarBacheScreen
+                    val nombre = usuario?.nombre ?: "Usuario"
                     if (photoUri != null && location != null) {
                         val geocoder = Geocoder(context, Locale.getDefault())
                         val direccion = try {
@@ -137,6 +145,7 @@ fun AppNavigation() {
 
                         reporteViewModel.crearReporte(
                             usuarioId = uid,
+                            usuarioNombre = nombre,
                             descripcion = descripcion,
                             latitud = location.latitude,
                             longitud = location.longitude,

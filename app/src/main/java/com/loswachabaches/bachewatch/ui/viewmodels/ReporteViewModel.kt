@@ -27,6 +27,7 @@ class ReporteViewModel : ViewModel() {
 
     fun crearReporte(
         usuarioId: String,
+        usuarioNombre: String,
         descripcion: String,
         latitud: Double,
         longitud: Double,
@@ -36,7 +37,7 @@ class ReporteViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.value = ReporteUiState.Cargando
             val resultado = reporteRepository.crearReporte(
-                usuarioId, descripcion, latitud, longitud, direccionAproximada, fotoUri
+                usuarioId, usuarioNombre, descripcion, latitud, longitud, direccionAproximada, fotoUri
             )
             _uiState.value = if (resultado.isSuccess) {
                 ReporteUiState.Exito

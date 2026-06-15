@@ -13,6 +13,7 @@ class ReporteRepository {
 
     suspend fun crearReporte(
         usuarioId: String,
+        usuarioNombre: String,
         descripcion: String,
         latitud: Double,
         longitud: Double,
@@ -28,6 +29,7 @@ class ReporteRepository {
             val reporte = Reporte(
                 id = docRef.id,
                 usuarioId = usuarioId,
+                usuarioNombre = usuarioNombre,
                 descripcion = descripcion,
                 latitud = latitud,
                 longitud = longitud,

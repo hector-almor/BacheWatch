@@ -19,6 +19,7 @@ import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -124,6 +125,12 @@ fun DetalleReporteScreen(
                         .clip(RoundedCornerShape(24.dp))
                 )
             }
+
+            DetalleCard(
+                icon = Icons.Outlined.Person,
+                title = "Reportado por",
+                value = reporte.usuarioNombre.ifEmpty { "Usuario desconocido" }
+            )
 
             // ── Descripción ───────────────────────────────────────────────
             DetalleCard(

@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.loswachabaches.bachewatch.ui.viewmodels.AuthViewModel
+import com.loswachabaches.bachewatch.ui.viewmodels.ReporteViewModel
 
 private val PrimaryColor = Color(0xFF1A1A2E)
 private val AccentColor = Color(0xFFFFDA25)
@@ -31,13 +32,16 @@ private val TextMutedColor = Color(0xFF9CA3AF)
 @Composable
 fun MiCuentaTab(
     authViewModel: AuthViewModel,
+    reporteViewModel: ReporteViewModel,
     onLogoutClick: () -> Unit = {}
 ) {
     val usuario by authViewModel.usuario.collectAsState()
+    val totalReportes by reporteViewModel.totalReportes.collectAsState()
 
     LaunchedEffect(Unit) {
-        authViewModel.obtenerUsuarioActual()?.uid?.let {
-            authViewModel.obtenerDatosUsuario(it)
+        authViewModel.obtenerUsuarioActual()?.uid?.let { uid ->
+            authViewModel.obtenerDatosUsuario(uid)
+            reporteViewModel.contarMisReportes(uid)
         }
     }
 
@@ -54,11 +58,12 @@ fun MiCuentaTab(
             color = PrimaryColor
         )
 
+        /*
         Text(
-            text = "Tu información: ",
+            text = "Mi información: ",
             color = TextMutedColor
         )
-
+        */
         Card(
             modifier = Modifier.fillMaxWidth(),
             elevation = CardDefaults.cardElevation(
@@ -84,7 +89,7 @@ fun MiCuentaTab(
                 )
 
                 Text(
-                    text = "Reportes realizados: 0",
+                    text = "Reportes realizados: $totalReportes",
                     color = PrimaryColor
                 )
             }

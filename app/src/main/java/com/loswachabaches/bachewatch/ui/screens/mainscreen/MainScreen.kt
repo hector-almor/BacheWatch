@@ -121,6 +121,7 @@ fun MainScreen(
 
                 Tab.MI_CUENTA -> MiCuentaTab(
                     authViewModel = authViewModel,
+                    reporteViewModel = reporteViewModel,
                     onLogoutClick = onLogoutClick
                 )
             }
