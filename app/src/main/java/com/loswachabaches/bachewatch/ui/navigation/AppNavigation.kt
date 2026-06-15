@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.loswachabaches.bachewatch.ui.screens.DetalleReporteScreen
 import com.loswachabaches.bachewatch.ui.screens.login.LoginScreen
 import com.loswachabaches.bachewatch.ui.screens.login.RegisterScreen
 import com.loswachabaches.bachewatch.ui.screens.mainscreen.MainScreen
@@ -25,6 +26,7 @@ object Routes {
     const val REGISTER = "register"
     const val MAIN = "main"
     const val REGISTRAR_BACHE = "registrar_bache"
+    const val DETALLE_REPORTE = "detalle_reporte/{reporteId}"
 }
 
 @Composable
@@ -104,6 +106,9 @@ fun AppNavigation() {
                         }
                         launchSingleTop = true
                     }
+                },
+                onReporteClick = { reporteId ->
+                    navController.navigate("detalle_reporte/$reporteId")
                 }
             )
         }
@@ -147,6 +152,17 @@ fun AppNavigation() {
                     navController.popBackStack()
                 }
             }
+        }
+
+        composable(route = Routes.DETALLE_REPORTE) { backStackEntry ->
+            val reporteId = backStackEntry.arguments?.getString("reporteId") ?: return@composable
+            val reportes by reporteViewModel.reportes.collectAsState()
+            val reporte = reportes.find { it.id == reporteId } ?: return@composable
+
+            DetalleReporteScreen(
+                reporte = reporte,
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }

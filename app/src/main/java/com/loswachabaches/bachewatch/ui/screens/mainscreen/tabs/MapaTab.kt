@@ -47,7 +47,10 @@ private val CDMX = GeoPoint(19.4326, -99.1332)
 
 @SuppressLint("MissingPermission")
 @Composable
-fun MapaTab(reporteViewModel: ReporteViewModel) {
+fun MapaTab(
+    reporteViewModel: ReporteViewModel,
+    onReporteClick: (String) -> Unit = {}
+) {
     val context = LocalContext.current
 
     val reportes by reporteViewModel.reportes.collectAsState()
@@ -129,7 +132,10 @@ fun MapaTab(reporteViewModel: ReporteViewModel) {
                 title = reporte.descripcion
                 snippet = reporte.direccionAproximada.ifEmpty { "Sin dirección" }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                infoWindow = BacheInfoWindow(map)
+                setOnMarkerClickListener { _, _ ->
+                    onReporteClick(reporte.id)
+                    true
+                }
             }
             map.overlays.add(marker)
         }

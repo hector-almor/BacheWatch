@@ -55,7 +55,7 @@ fun MiCuentaTab(
         )
 
         Text(
-            text = "Información básica del usuario.",
+            text = "Tu información: ",
             color = TextMutedColor
         )
 

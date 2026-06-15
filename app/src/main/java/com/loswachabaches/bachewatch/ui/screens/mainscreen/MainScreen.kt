@@ -67,7 +67,8 @@ fun MainScreen(
     authViewModel: AuthViewModel,
     reporteViewModel: ReporteViewModel,
     onLogoutClick: () -> Unit = {},
-    onAddClick: () -> Unit = {}
+    onAddClick: () -> Unit = {},
+    onReporteClick: (String) -> Unit = {}
 ) {
     var activeTab by remember { mutableStateOf(Tab.MAPA) }
 
@@ -109,7 +110,10 @@ fun MainScreen(
                 .padding(innerPadding)
         ) {
             when (activeTab) {
-                Tab.MAPA -> MapaTab(reporteViewModel = reporteViewModel)
+                Tab.MAPA -> MapaTab(
+                    reporteViewModel = reporteViewModel,
+                    onReporteClick = onReporteClick
+                )
 
                 Tab.ESTADISTICAS -> EstadisticasTab()
 
