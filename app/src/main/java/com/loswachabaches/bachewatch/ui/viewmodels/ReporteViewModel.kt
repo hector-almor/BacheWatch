@@ -25,6 +25,14 @@ class ReporteViewModel : ViewModel() {
     private val _totalReportes = MutableStateFlow(0)
     val totalReportes: StateFlow<Int> = _totalReportes.asStateFlow()
 
+    private val _reportesEnMiZona = MutableStateFlow<List<Reporte>>(emptyList())
+    val reportesEnMiZona: StateFlow<List<Reporte>> = _reportesEnMiZona.asStateFlow()
+
+    private val _zonasTop = MutableStateFlow<List<Pair<String, Int>>>(emptyList())
+    val zonasTop: StateFlow<List<Pair<String, Int>>> = _zonasTop.asStateFlow()
+
+
+
     fun crearReporte(
         usuarioId: String,
         usuarioNombre: String,
@@ -76,6 +84,24 @@ class ReporteViewModel : ViewModel() {
 
     fun resetUiState() {
         _uiState.value = ReporteUiState.Idle
+    }
+
+    fun obtenerReportesCercanos(latitud: Double, longitud: Double) {
+        viewModelScope.launch {
+            val resultado = reporteRepository.obtenerReportesPorZona(latitud, longitud, radioKm = 2.0)
+            if (resultado.isSuccess) {
+                _reportesEnMiZona.value = resultado.getOrNull() ?: emptyList()
+            }
+        }
+    }
+
+    fun obtenerZonaConMasBaches() {
+        viewModelScope.launch {
+            val resultado = reporteRepository.obtenerZonaConMasBaches()
+            if (resultado.isSuccess) {
+                _zonasTop.value = resultado.getOrNull() ?: emptyList()
+            }
+        }
     }
 }
 

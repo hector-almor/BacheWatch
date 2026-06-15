@@ -6,6 +6,7 @@ import java.util.Date
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
+import kotlin.math.pow
 
 class ReporteRepository {
     private val firestore = FirebaseFirestore.getInstance()
@@ -83,4 +84,57 @@ class ReporteRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun obtenerReportesPorZona(
+        latitud: Double,
+        longitud: Double,
+        radioKm: Double = 2.0
+    ): Result<List<Reporte>> {
+        return try {
+            val snapshot = firestore.collection("reportes")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get().await()
+            val todos = snapshot.toObjects(Reporte::class.java)
+
+            // Filtrar por distancia (Haversine simple)
+            val filtrados = todos.filter { reporte ->
+                val dLat = Math.toRadians(reporte.latitud - latitud)
+                val dLon = Math.toRadians(reporte.longitud - longitud)
+                val a = Math.sin(dLat / 2).pow(2) +
+                        Math.cos(Math.toRadians(latitud)) *
+                        Math.cos(Math.toRadians(reporte.latitud)) *
+                        Math.sin(dLon / 2).pow(2)
+                val distKm = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+                distKm <= radioKm
+            }
+            Result.success(filtrados)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun obtenerZonaConMasBaches(): Result<List<Pair<String, Int>>> {
+        return try {
+            val snapshot = firestore.collection("reportes").get().await()
+            val todos = snapshot.toObjects(Reporte::class.java)
+
+            if (todos.isEmpty()) return Result.success(emptyList())
+
+            val agrupados = todos
+                .groupBy { reporte ->
+                    reporte.direccionAproximada
+                        .trim()
+                        .ifBlank { "Dirección desconocida" }
+                }
+                .mapValues { it.value.size }
+                .entries
+                .sortedByDescending { it.value }
+                .map { Pair(it.key, it.value) }
+
+            Result.success(agrupados)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 }

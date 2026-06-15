@@ -1,33 +1,30 @@
 package com.loswachabaches.bachewatch.ui.screens.mainscreen.tabs
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.loswachabaches.bachewatch.ui.viewmodels.AuthViewModel
 import com.loswachabaches.bachewatch.ui.viewmodels.ReporteViewModel
 
-private val PrimaryColor = Color(0xFF1A1A2E)
-private val AccentColor = Color(0xFFFFDA25)
-private val TextMutedColor = Color(0xFF9CA3AF)
+private val Primary   = Color(0xFF1A1A2E)
+private val Accent    = Color(0xFFFFDA25)
+private val TextMuted = Color(0xFF9CA3AF)
+private val BgLight   = Color(0xFFF5F4F0)
 
 @Composable
 fun MiCuentaTab(
@@ -35,7 +32,7 @@ fun MiCuentaTab(
     reporteViewModel: ReporteViewModel,
     onLogoutClick: () -> Unit = {}
 ) {
-    val usuario by authViewModel.usuario.collectAsState()
+    val usuario       by authViewModel.usuario.collectAsState()
     val totalReportes by reporteViewModel.totalReportes.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -48,70 +45,101 @@ fun MiCuentaTab(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(BgLight)
+            .verticalScroll(rememberScrollState())
             .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = "Mi cuenta",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = PrimaryColor
-        )
+        Text("Mi cuenta", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Primary)
 
-        /*
-        Text(
-            text = "Mi información: ",
-            color = TextMutedColor
-        )
-        */
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 4.dp
-            ),
-            shape = RoundedCornerShape(18.dp)
+        // Avatar + info
+        Surface(
+            modifier        = Modifier.fillMaxWidth(),
+            shape           = RoundedCornerShape(16.dp),
+            color           = Color.White,
+            shadowElevation = 2.dp
         ) {
-            Column(
-                modifier = Modifier.padding(18.dp)
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Text(
-                    text = usuario?.nombre ?:"Cargando...",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = PrimaryColor
+                // Iniciales
+                val iniciales = usuario?.nombre
+                    ?.split(" ")
+                    ?.mapNotNull { it.firstOrNull()?.uppercaseChar() }
+                    ?.take(2)
+                    ?.joinToString("") ?: "?"
+
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(Accent),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(iniciales, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Primary)
+                }
+
+                Column {
+                    Text(
+                        text       = usuario?.nombre ?: "Cargando...",
+                        fontSize   = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color      = Primary
+                    )
+                    Text(
+                        text     = usuario?.correo ?: "",
+                        fontSize = 13.sp,
+                        color    = TextMuted
+                    )
+                }
+            }
+        }
+
+        // Reportes enviados
+        Surface(
+            modifier        = Modifier.fillMaxWidth(),
+            shape           = RoundedCornerShape(16.dp),
+            color           = Color.White,
+            shadowElevation = 2.dp
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    Icons.Outlined.Description,
+                    contentDescription = null,
+                    tint     = Accent,
+                    modifier = Modifier.size(22.dp)
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
                 Text(
-                    text = "Correo: ${usuario?.correo ?: ""}",
-                    color = PrimaryColor
-                )
-
-                Text(
-                    text = "Reportes realizados: $totalReportes",
-                    color = PrimaryColor
+                    text       = "$totalReportes reporte${if (totalReportes != 1) "s" else ""} enviado${if (totalReportes != 1) "s" else ""}",
+                    fontSize   = 15.sp,
+                    fontWeight = FontWeight.Medium,
+                    color      = Primary
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
+        // Cerrar sesión
         Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp),
-            onClick = onLogoutClick,
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = AccentColor,
-                contentColor = PrimaryColor
-            )
+            onClick   = onLogoutClick,
+            modifier  = Modifier.fillMaxWidth().height(50.dp),
+            shape     = RoundedCornerShape(14.dp),
+            colors    = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFFFE0E0),
+                contentColor   = Color(0xFFDC2626)
+            ),
+            elevation = ButtonDefaults.buttonElevation(0.dp)
         ) {
-            Text(
-                text = "Cerrar sesión",
-                fontWeight = FontWeight.Bold
-            )
+            Icon(Icons.Outlined.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Cerrar sesión", fontWeight = FontWeight.SemiBold)
         }
     }
 }
