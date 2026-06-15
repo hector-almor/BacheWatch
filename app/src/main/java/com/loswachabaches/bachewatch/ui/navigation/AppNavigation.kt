@@ -1,9 +1,11 @@
 package com.loswachabaches.bachewatch.ui.navigation
 
+import android.location.Geocoder
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,6 +18,7 @@ import com.loswachabaches.bachewatch.ui.viewmodels.AuthUiState
 import com.loswachabaches.bachewatch.ui.viewmodels.AuthViewModel
 import com.loswachabaches.bachewatch.ui.viewmodels.ReporteUiState
 import com.loswachabaches.bachewatch.ui.viewmodels.ReporteViewModel
+import java.util.Locale
 
 object Routes {
     const val LOGIN = "login"
@@ -31,6 +34,7 @@ fun AppNavigation() {
     val authViewModel: AuthViewModel = viewModel()
     val reporteViewModel: ReporteViewModel = viewModel()
 
+    val context = LocalContext.current
     NavHost(
         navController = navController,
         startDestination = Routes.LOGIN
@@ -118,12 +122,20 @@ fun AppNavigation() {
                 onSaveClick = { photoUri, location, descripcion ->
                     val uid = authViewModel.obtenerUsuarioActual()?.uid ?: return@RegistrarBacheScreen
                     if (photoUri != null && location != null) {
+                        val geocoder = Geocoder(context, Locale.getDefault())
+                        val direccion = try {
+                            val resultado = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                            resultado?.firstOrNull()?.getAddressLine(0) ?: ""
+                        } catch (e: Exception) {
+                            ""
+                        }
+
                         reporteViewModel.crearReporte(
                             usuarioId = uid,
                             descripcion = descripcion,
                             latitud = location.latitude,
                             longitud = location.longitude,
-                            direccionAproximada = "",
+                            direccionAproximada = direccion,
                             fotoUri = photoUri
                         )
                     }
