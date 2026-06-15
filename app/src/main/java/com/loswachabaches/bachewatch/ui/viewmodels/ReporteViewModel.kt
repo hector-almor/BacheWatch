@@ -31,8 +31,6 @@ class ReporteViewModel : ViewModel() {
     private val _zonasTop = MutableStateFlow<List<Pair<String, Int>>>(emptyList())
     val zonasTop: StateFlow<List<Pair<String, Int>>> = _zonasTop.asStateFlow()
 
-
-
     fun crearReporte(
         usuarioId: String,
         usuarioNombre: String,
@@ -101,6 +99,24 @@ class ReporteViewModel : ViewModel() {
             if (resultado.isSuccess) {
                 _zonasTop.value = resultado.getOrNull() ?: emptyList()
             }
+        }
+    }
+
+    fun editarReporte(reporteId: String, nuevaDescripcion: String) {
+        viewModelScope.launch {
+            _uiState.value = ReporteUiState.Cargando
+            val resultado = reporteRepository.editarReporte(reporteId, nuevaDescripcion)
+            _uiState.value = if (resultado.isSuccess) ReporteUiState.Exito
+            else ReporteUiState.Error(resultado.exceptionOrNull()?.message ?: "Error")
+        }
+    }
+
+    fun eliminarReporte(reporteId: String) {
+        viewModelScope.launch {
+            _uiState.value = ReporteUiState.Cargando
+            val resultado = reporteRepository.eliminarReporte(reporteId)
+            _uiState.value = if (resultado.isSuccess) ReporteUiState.Exito
+            else ReporteUiState.Error(resultado.exceptionOrNull()?.message ?: "Error")
         }
     }
 }

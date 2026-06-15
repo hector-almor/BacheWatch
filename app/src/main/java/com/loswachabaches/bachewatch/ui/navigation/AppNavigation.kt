@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.loswachabaches.bachewatch.ui.screens.DetalleReporteScreen
+import com.loswachabaches.bachewatch.ui.screens.EditarReporteScreen
 import com.loswachabaches.bachewatch.ui.screens.login.LoginScreen
 import com.loswachabaches.bachewatch.ui.screens.login.RegisterScreen
 import com.loswachabaches.bachewatch.ui.screens.mainscreen.MainScreen
@@ -27,6 +28,7 @@ object Routes {
     const val MAIN = "main"
     const val REGISTRAR_BACHE = "registrar_bache"
     const val DETALLE_REPORTE = "detalle_reporte/{reporteId}"
+    const val EDITAR_REPORTE = "editar_reporte/{reporteId}"
 }
 
 @Composable
@@ -35,6 +37,7 @@ fun AppNavigation() {
     // Que se comparta con otras pantallas
     val authViewModel: AuthViewModel = viewModel()
     val reporteViewModel: ReporteViewModel = viewModel()
+
 
     val context = LocalContext.current
     NavHost(
@@ -99,22 +102,21 @@ fun AppNavigation() {
 
         composable(route = Routes.MAIN) {
             MainScreen(
-                authViewModel = authViewModel,
+                authViewModel    = authViewModel,
                 reporteViewModel = reporteViewModel,
-                onAddClick = {
-                    navController.navigate(Routes.REGISTRAR_BACHE)
-                },
-                onLogoutClick = {
+                onAddClick       = { navController.navigate(Routes.REGISTRAR_BACHE) },
+                onLogoutClick    = {
                     authViewModel.logout()
                     navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.MAIN) {
-                            inclusive = true
-                        }
+                        popUpTo(Routes.MAIN) { inclusive = true }
                         launchSingleTop = true
                     }
                 },
                 onReporteClick = { reporteId ->
                     navController.navigate("detalle_reporte/$reporteId")
+                },
+                onEditarClick = { reporteId ->
+                    navController.navigate("editar_reporte/$reporteId")
                 }
             )
         }
@@ -172,6 +174,33 @@ fun AppNavigation() {
                 reporte = reporte,
                 onBackClick = { navController.popBackStack() }
             )
+        }
+        composable(route = Routes.EDITAR_REPORTE) { backStackEntry ->
+            val reporteId = backStackEntry.arguments?.getString("reporteId") ?: return@composable
+            val reportes  by reporteViewModel.misReportes.collectAsState()
+            val reporte   = reportes.find { it.id == reporteId } ?: return@composable
+            val uiState   by reporteViewModel.uiState.collectAsState()
+
+            EditarReporteScreen(
+                reporte         = reporte,
+                onBackClick     = { navController.popBackStack() },
+                onGuardarClick  = { nuevaDescripcion ->
+                    reporteViewModel.editarReporte(reporteId, nuevaDescripcion)
+                },
+                onEliminarClick = {
+                    reporteViewModel.eliminarReporte(reporteId)
+                }
+            )
+
+            LaunchedEffect(uiState) {
+                if (uiState is ReporteUiState.Exito) {
+                    reporteViewModel.resetUiState()
+                    authViewModel.obtenerUsuarioActual()?.uid?.let {
+                        reporteViewModel.obtenerMisReportes(it)
+                    }
+                    navController.popBackStack()
+                }
+            }
         }
     }
 }

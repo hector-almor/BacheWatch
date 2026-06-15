@@ -109,12 +109,6 @@ fun MiCuentaTab(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(
-                    Icons.Outlined.Description,
-                    contentDescription = null,
-                    tint     = Accent,
-                    modifier = Modifier.size(22.dp)
-                )
                 Text(
                     text       = "$totalReportes reporte${if (totalReportes != 1) "s" else ""} enviado${if (totalReportes != 1) "s" else ""}",
                     fontSize   = 15.sp,

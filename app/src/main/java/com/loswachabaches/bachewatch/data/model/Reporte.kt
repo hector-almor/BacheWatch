@@ -4,6 +4,7 @@ import java.util.Date
 
 data class Reporte(
     val id: String = "",
+    val uid: String = "",
     val usuarioId: String = "",
     val usuarioNombre: String = "",
     val descripcion: String = "",

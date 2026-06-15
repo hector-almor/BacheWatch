@@ -68,7 +68,8 @@ fun MainScreen(
     reporteViewModel: ReporteViewModel,
     onLogoutClick: () -> Unit = {},
     onAddClick: () -> Unit = {},
-    onReporteClick: (String) -> Unit = {}
+    onReporteClick: (String) -> Unit = {},
+    onEditarClick: (String) -> Unit = {}
 ) {
     var activeTab by remember { mutableStateOf(Tab.MAPA) }
 
@@ -117,7 +118,12 @@ fun MainScreen(
 
                 Tab.ESTADISTICAS -> EstadisticasTab()
 
-                Tab.MIS_REPORTES -> MisReportesTab()
+                Tab.MIS_REPORTES -> MisReportesTab(
+                    authViewModel     = authViewModel,
+                    reporteViewModel  = reporteViewModel,
+                    onVerDetalleClick = onReporteClick,
+                    onEditarClick     = onEditarClick
+                )
 
                 Tab.MI_CUENTA -> MiCuentaTab(
                     authViewModel = authViewModel,
@@ -138,15 +144,6 @@ private fun BacheTopBar() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.bachewatch_logo),
-                    contentDescription = "Logo BacheWatch",
-                    modifier = Modifier.size(34.dp),
-                    contentScale = ContentScale.Fit
-                )
-
-                Spacer(modifier = Modifier.size(8.dp))
-
                 Image(
                     painter = painterResource(id = R.drawable.logo_largo),
                     contentDescription = "Nombre BacheWatch",
@@ -230,9 +227,7 @@ private fun RowScope.BottomNavItem(
         modifier = Modifier
             .weight(1f)
             .fillMaxHeight()
-            .clickable {
-                onClick()
-            },
+            .clickable { onClick() },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

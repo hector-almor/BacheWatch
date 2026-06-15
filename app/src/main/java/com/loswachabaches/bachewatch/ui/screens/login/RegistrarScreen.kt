@@ -3,36 +3,19 @@ package com.loswachabaches.bachewatch.ui.screens.login
 import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -41,7 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.loswachabaches.bachewatch.R
@@ -49,10 +32,6 @@ import com.loswachabaches.bachewatch.ui.viewmodels.AuthUiState
 
 data class RegisterUserData(
     val nombre: String,
-    // val apellidoPaterno: String,
-    // val apellidoMaterno: String,
-    // val ciudad: String,
-    // val telefono: String,
     val correo: String,
     val password: String
 )
@@ -63,318 +42,246 @@ fun RegisterScreen(
     onRegisterClick: (RegisterUserData) -> Unit = {},
     onLoginClick: () -> Unit = {}
 ) {
-    val negro = Color(0xFF0B0B0B)
+    val negro    = Color(0xFF0B0B0B)
     val amarillo = Color(0xFFFFDA25)
-    val blanco = Color(0xFFFFFFFF)
-    val gris = Color(0xFF4B4A4A)
-    val rojo = Color(0xFFFF4D4D)
+    val blanco   = Color(0xFFFFFFFF)
+    val gris     = Color(0xFF4B4A4A)
+    val rojo     = Color(0xFFFF4D4D)
+    val blancoSutil = blanco.copy(alpha = 0.08f)
 
-    var nombre by remember { mutableStateOf("") }
-    // var apellidoPaterno by remember { mutableStateOf("") }
-    // var apellidoMaterno by remember { mutableStateOf("") }
-    // var ciudad by remember { mutableStateOf("") }
-    // var telefono by remember { mutableStateOf("") }
-    var correo by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var repetirPassword by remember { mutableStateOf("") }
-
-    var verPassword by remember { mutableStateOf(false) }
+    var nombre            by remember { mutableStateOf("") }
+    var correo            by remember { mutableStateOf("") }
+    var password          by remember { mutableStateOf("") }
+    var repetirPassword   by remember { mutableStateOf("") }
+    var verPassword       by remember { mutableStateOf(false) }
     var verRepetirPassword by remember { mutableStateOf(false) }
 
-    val nombreTieneError = nombre.isNotBlank() && nombre.trim().length < 2
-   // val apellidoPaternoTieneError =
-   //     apellidoPaterno.isNotBlank() && apellidoPaterno.trim().length < 2
-   // val ciudadTieneError = ciudad.isNotBlank() && ciudad.trim().length < 2
-
-   // val telefonoTieneError =
-   //     telefono.isNotBlank() && telefono.length != 10
-
-    val correoValido = Patterns.EMAIL_ADDRESS
-        .matcher(correo.trim())
-        .matches()
-
-    val correoTieneError = correo.isNotBlank() && !correoValido
-
-    val passwordTieneError =
-        password.isNotBlank() && password.length < 6
-
-    val repetirPasswordTieneError =
-        repetirPassword.isNotBlank() && repetirPassword != password
+    val nombreTieneError          = nombre.isNotBlank() && nombre.trim().length < 2
+    val correoValido              = Patterns.EMAIL_ADDRESS.matcher(correo.trim()).matches()
+    val correoTieneError          = correo.isNotBlank() && !correoValido
+    val passwordTieneError        = password.isNotBlank() && password.length < 6
+    val repetirPasswordTieneError = repetirPassword.isNotBlank() && repetirPassword != password
 
     val puedeRegistrarse =
         nombre.trim().length >= 2 &&
-                // apellidoPaterno.trim().length >= 2 &&
-                // ciudad.trim().length >= 2 &&
-                // telefono.length == 10 &&
                 correoValido &&
                 password.length >= 6 &&
                 repetirPassword == password
 
-    val backgroundGrad = Brush.verticalGradient(
+    val gradiente = Brush.verticalGradient(
         colorStops = arrayOf(
-            0.0f to negro,
-            0.78f to gris,
-            1.0f to amarillo
+            0.0f  to negro,
+            0.65f to Color(0xFF1a1a2e),
+            1.0f  to Color(0xFF2a2200)
         )
     )
 
-    Scaffold(
-        containerColor = negro
-    ) { paddingValues ->
-
+    Scaffold(containerColor = negro) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(backgroundGrad)
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.Top,
+                .background(gradiente)
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(52.dp))
 
-            Spacer(modifier = Modifier.height(38.dp))
-
+            // Logo
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment     = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                modifier              = Modifier.fillMaxWidth()
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.bachewatch_logo),
-                    contentDescription = "Logo BacheWatch",
-                    modifier = Modifier.size(72.dp),
-                    contentScale = ContentScale.Fit
-                )
-
                 Spacer(modifier = Modifier.width(10.dp))
-
                 Image(
-                    painter = painterResource(id = R.drawable.logo_largo),
-                    contentDescription = "Nombre BacheWatch",
-                    modifier = Modifier.size(width = 145.dp, height = 72.dp),
-                    contentScale = ContentScale.Fit
+                    painter            = painterResource(id = R.drawable.logo_largo),
+                    contentDescription = "BacheWatch",
+                    modifier           = Modifier.size(width = 140.dp, height = 70.dp),
+                    contentScale       = ContentScale.Fit
                 )
             }
 
-            Spacer(modifier = Modifier.height(22.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            Text(
-                text = "Crear cuenta",
-                color = blanco,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(18.dp))
-
-            // Nombre
-            RegisterTextField(
-                value = nombre,
-                onValueChange = { nombre = it },
-                label = "Nombre",
-                isError = nombreTieneError,
-                errorText = "Ingresa mínimo 2 caracteres",
-                blanco = blanco,
-                amarillo = amarillo,
-                rojo = rojo
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Apellidos en par
-            /*
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            // Card formulario
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(blancoSutil)
+                    .padding(24.dp)
             ) {
-                RegisterTextField(
-                    modifier = Modifier.weight(1f),
-                    value = apellidoPaterno,
-                    onValueChange = { apellidoPaterno = it },
-                    label = "Ap. paterno",
-                    isError = apellidoPaternoTieneError,
-                    errorText = "Mínimo 2 caracteres",
-                    blanco = blanco,
-                    amarillo = amarillo,
-                    rojo = rojo
-                )
-                RegisterTextField(
-                    modifier = Modifier.weight(1f),
-                    value = apellidoMaterno,
-                    onValueChange = { apellidoMaterno = it },
-                    label = "Ap. materno",
-                    isError = false,
-                    errorText = "",
-                    blanco = blanco,
-                    amarillo = amarillo,
-                    rojo = rojo
-                )
-            }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
-            Spacer(modifier = Modifier.height(8.dp))
-            */
+                    Text(
+                        text       = "Crear cuenta",
+                        color      = blanco,
+                        fontSize   = 22.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text      = "Completa los datos",
+                        color     = blanco.copy(alpha = 0.5f),
+                        fontSize  = 13.sp,
+                        textAlign = TextAlign.Center,
+                        modifier  = Modifier.padding(top = 4.dp, bottom = 20.dp)
+                    )
 
-            // Ciudad y teléfono en par
-           /*
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                RegisterTextField(
-                    modifier = Modifier.weight(1f),
-                    value = ciudad,
-                    onValueChange = { ciudad = it },
-                    label = "Ciudad",
-                    isError = ciudadTieneError,
-                    errorText = "Ciudad inválida",
-                    blanco = blanco,
-                    amarillo = amarillo,
-                    rojo = rojo
-                )
-                RegisterTextField(
-                    modifier = Modifier.weight(1f),
-                    value = telefono,
-                    onValueChange = { newValue ->
-                        telefono = newValue
-                            .filter { it.isDigit() }
-                            .take(10)
-                    },
-                    label = "Teléfono",
-                    isError = telefonoTieneError,
-                    errorText = "10 dígitos",
-                    keyboardType = KeyboardType.Phone,
-                    blanco = blanco,
-                    amarillo = amarillo,
-                    rojo = rojo
-                )
-            }
+                    // Nombre
+                    RegisterTextField(
+                        value         = nombre,
+                        onValueChange = { nombre = it },
+                        label         = "Nombre",
+                        isError       = nombreTieneError,
+                        errorText     = "Mínimo 2 caracteres",
+                        blanco        = blanco,
+                        amarillo      = amarillo,
+                        rojo          = rojo
+                    )
 
-            Spacer(modifier = Modifier.height(8.dp))
-            */
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            // Correo
-            RegisterTextField(
-                value = correo,
-                onValueChange = { correo = it },
-                label = "Correo electrónico",
-                isError = correoTieneError,
-                errorText = "Correo inválido, ej: usuario@email.com",
-                keyboardType = KeyboardType.Email,
-                blanco = blanco,
-                amarillo = amarillo,
-                rojo = rojo
-            )
+                    // Correo
+                    RegisterTextField(
+                        value         = correo,
+                        onValueChange = { correo = it },
+                        label         = "Correo electrónico",
+                        isError       = correoTieneError,
+                        errorText     = "Correo no valido, ej: usuario@email.com",
+                        keyboardType  = KeyboardType.Email,
+                        blanco        = blanco,
+                        amarillo      = amarillo,
+                        rojo          = rojo
+                    )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            // Contraseña
-            RegisterTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = "Contraseña",
-                isError = passwordTieneError,
-                errorText = "Mínimo 6 caracteres",
-                keyboardType = KeyboardType.Password,
-                visualTransformation = if (verPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    TextButton(onClick = { verPassword = !verPassword }) {
+                    // Contraseña
+                    RegisterTextField(
+                        value                = password,
+                        onValueChange        = { password = it },
+                        label                = "Contraseña",
+                        isError              = passwordTieneError,
+                        errorText            = "Mínimo 6 caracteres",
+                        keyboardType         = KeyboardType.Password,
+                        visualTransformation = if (verPassword) VisualTransformation.None
+                        else PasswordVisualTransformation(),
+                        trailingIcon         = {
+                            IconButton(onClick = { verPassword = !verPassword }) {
+                                Icon(
+                                    imageVector        = if (verPassword) Icons.Outlined.VisibilityOff
+                                    else Icons.Outlined.Visibility,
+                                    contentDescription = null,
+                                    tint               = amarillo
+                                )
+                            }
+                        },
+                        blanco   = blanco,
+                        amarillo = amarillo,
+                        rojo     = rojo
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Repetir contraseña
+                    RegisterTextField(
+                        value                = repetirPassword,
+                        onValueChange        = { repetirPassword = it },
+                        label                = "Repetir contraseña",
+                        isError              = repetirPasswordTieneError,
+                        errorText            = "Las contraseñas no coinciden",
+                        keyboardType         = KeyboardType.Password,
+                        visualTransformation = if (verRepetirPassword) VisualTransformation.None
+                        else PasswordVisualTransformation(),
+                        trailingIcon         = {
+                            IconButton(onClick = { verRepetirPassword = !verRepetirPassword }) {
+                                Icon(
+                                    imageVector        = if (verRepetirPassword) Icons.Outlined.VisibilityOff
+                                    else Icons.Outlined.Visibility,
+                                    contentDescription = null,
+                                    tint               = amarillo
+                                )
+                            }
+                        },
+                        blanco   = blanco,
+                        amarillo = amarillo,
+                        rojo     = rojo
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Botón registrar
+                    Button(
+                        onClick  = {
+                            onRegisterClick(
+                                RegisterUserData(
+                                    nombre   = nombre.trim(),
+                                    correo   = correo.trim(),
+                                    password = password
+                                )
+                            )
+                        },
+                        enabled  = puedeRegistrarse && uiState !is AuthUiState.Cargando,
+                        modifier = Modifier.fillMaxWidth().height(52.dp),
+                        shape    = RoundedCornerShape(16.dp),
+                        colors   = ButtonDefaults.buttonColors(
+                            containerColor         = amarillo,
+                            contentColor           = negro,
+                            disabledContainerColor = gris,
+                            disabledContentColor   = blanco.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        if (uiState is AuthUiState.Cargando) {
+                            CircularProgressIndicator(
+                                modifier    = Modifier.size(20.dp),
+                                color       = negro,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("Registrarse", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    if (uiState is AuthUiState.Error) {
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = if (verPassword) "Ocultar" else "Ver",
-                            color = amarillo,
-                            fontSize = 12.sp
+                            text      = uiState.mensaje,
+                            color     = rojo,
+                            fontSize  = 13.sp,
+                            textAlign = TextAlign.Center
                         )
                     }
-                },
-                blanco = blanco,
-                amarillo = amarillo,
-                rojo = rojo
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Repetir contraseña
-            RegisterTextField(
-                value = repetirPassword,
-                onValueChange = { repetirPassword = it },
-                label = "Repetir contraseña",
-                isError = repetirPasswordTieneError,
-                errorText = "Las contraseñas no coinciden",
-                keyboardType = KeyboardType.Password,
-                visualTransformation = if (verRepetirPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    TextButton(onClick = { verRepetirPassword = !verRepetirPassword }) {
-                        Text(
-                            text = if (verRepetirPassword) "Ocultar" else "Ver",
-                            color = amarillo,
-                            fontSize = 12.sp
-                        )
-                    }
-                },
-                blanco = blanco,
-                amarillo = amarillo,
-                rojo = rojo
-            )
+                }
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Button(
-                onClick = {
-                    onRegisterClick(
-                        RegisterUserData(
-                            nombre = nombre.trim(),
-                            // apellidoPaterno = apellidoPaterno.trim(),
-                            // apellidoMaterno = apellidoMaterno.trim(),
-                            // ciudad = ciudad.trim(),
-                            // telefono = telefono.trim(),
-                            correo = correo.trim(),
-                            password = password
-                        )
-                    )
-                    // onLoginClick()
-                },
-                enabled = puedeRegistrarse && uiState !is AuthUiState.Cargando,
-
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = amarillo,
-                    contentColor = negro,
-                    disabledContainerColor = gris,
-                    disabledContentColor = blanco.copy(alpha = 0.60f)
-                )
+            // Link a login
+            Row(
+                verticalAlignment     = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                if (uiState is AuthUiState.Cargando) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = negro,
-                        strokeWidth = 2.dp
-                    )
-                } else {
+                Text(
+                    text     = "Ya tienes cuenta?, ",
+                    color    = blanco.copy(alpha = 0.6f),
+                    fontSize = 14.sp
+                )
+                TextButton(
+                    onClick        = onLoginClick,
+                    contentPadding = PaddingValues(0.dp)
+                ) {
                     Text(
-                        text = "Registrarse",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
+                        text       = "Inicia sesión",
+                        color      = amarillo,
+                        fontSize   = 14.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            TextButton(
-                onClick = onLoginClick
-            ) {
-                Text(
-                    text = "¿Ya tienes cuenta? Iniciar sesión",
-                    color = amarillo,
-                    fontSize = 13.sp,
-                    textDecoration = TextDecoration.Underline
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
@@ -395,45 +302,33 @@ private fun RegisterTextField(
     rojo: Color
 ) {
     OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier
-            .fillMaxWidth()
-            .fillMaxWidth(),
-            // .height(if (isError) 78.dp else 62.dp), lo comento porque hace que el campo de nombre se achique -_-
-
-        label = {
-            Text(label)
-        },
-        singleLine = true,
-        isError = isError,
+        value               = value,
+        onValueChange       = onValueChange,
+        modifier            = modifier.fillMaxWidth(),
+        label               = { Text(label) },
+        singleLine          = true,
+        isError             = isError,
         visualTransformation = visualTransformation,
-        trailingIcon = trailingIcon,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = keyboardType
-        ),
-        supportingText = {
-            if (isError) {
-                Text(
-                    text = errorText,
-                    color = rojo,
-                    fontSize = 11.sp
-                )
-            }
+        trailingIcon        = trailingIcon,
+        keyboardOptions     = KeyboardOptions(keyboardType = keyboardType),
+        supportingText      = {
+            if (isError) Text(errorText, color = rojo, fontSize = 11.sp)
         },
-        shape = RoundedCornerShape(14.dp),
+        shape  = RoundedCornerShape(14.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = blanco,
-            unfocusedTextColor = blanco,
-            focusedBorderColor = amarillo,
-            unfocusedBorderColor = blanco.copy(alpha = 0.45f),
-            focusedLabelColor = amarillo,
-            unfocusedLabelColor = blanco.copy(alpha = 0.70f),
-            cursorColor = amarillo,
-            errorTextColor = blanco,
-            errorBorderColor = rojo,
-            errorLabelColor = rojo,
-            errorCursorColor = rojo
+            focusedTextColor        = blanco,
+            unfocusedTextColor      = blanco,
+            focusedBorderColor      = amarillo,
+            unfocusedBorderColor    = blanco.copy(alpha = 0.3f),
+            focusedLabelColor       = amarillo,
+            unfocusedLabelColor     = blanco.copy(alpha = 0.6f),
+            cursorColor             = amarillo,
+            errorTextColor          = blanco,
+            errorBorderColor        = rojo,
+            errorLabelColor         = rojo,
+            errorCursorColor        = rojo,
+            focusedContainerColor   = blanco.copy(alpha = 0.05f),
+            unfocusedContainerColor = blanco.copy(alpha = 0.05f)
         )
     )
 }

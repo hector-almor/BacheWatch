@@ -29,6 +29,7 @@ class ReporteRepository {
             val docRef = firestore.collection("reportes").document()
             val reporte = Reporte(
                 id = docRef.id,
+                uid = usuarioId,
                 usuarioId = usuarioId,
                 usuarioNombre = usuarioNombre,
                 descripcion = descripcion,
@@ -62,28 +63,36 @@ class ReporteRepository {
     suspend fun obtenerReportesPorUsuario(usuarioId: String): Result<List<Reporte>> {
         return try {
             val snapshot = firestore.collection("reportes")
-                .whereEqualTo("usuarioId", usuarioId)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get().await()
 
-            val reportes = snapshot.toObjects(Reporte::class.java)
+            // Filtra en memoria por uid O usuarioId para cubrir reportes viejos y nuevos
+            val reportes = snapshot.documents.mapNotNull { doc ->
+                val uid       = doc.getString("uid") ?: ""
+                val usuId     = doc.getString("usuarioId") ?: ""
+                if (uid != usuarioId && usuId != usuarioId) return@mapNotNull null
+
+                Reporte(
+                    id                  = doc.id,
+                    uid                 = uid,
+                    usuarioId           = usuId,
+                    usuarioNombre       = doc.getString("usuarioNombre") ?: "",
+                    descripcion         = doc.getString("descripcion") ?: "",
+                    latitud             = doc.getDouble("latitud") ?: 0.0,
+                    longitud            = doc.getDouble("longitud") ?: 0.0,
+                    direccionAproximada = doc.getString("direccionAproximada") ?: "",
+                    fotoUrl             = doc.getString("fotoUrl") ?: "",
+                    timestamp           = doc.getDate("timestamp") ?: Date()
+                )
+            }
+
             Result.success(reportes)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    suspend fun contarReportesPorUsuario(usuarioId: String): Result<Int> {
-        return try {
-            val snapshot = firestore.collection("reportes")
-                .whereEqualTo("usuarioId", usuarioId)
-                .get().await()
 
-            Result.success(snapshot.size())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
 
     suspend fun obtenerReportesPorZona(
         latitud: Double,
@@ -132,6 +141,46 @@ class ReporteRepository {
                 .map { Pair(it.key, it.value) }
 
             Result.success(agrupados)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    suspend fun editarReporte(reporteId: String, nuevaDescripcion: String): Result<Unit> {
+        return try {
+            firestore.collection("reportes")
+                .document(reporteId)
+                .update("descripcion", nuevaDescripcion)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun eliminarReporte(reporteId: String): Result<Unit> {
+        return try {
+            firestore.collection("reportes")
+                .document(reporteId)
+                .delete()
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    suspend fun contarReportesPorUsuario(usuarioId: String): Result<Int> {
+        return try {
+            val snapshot = firestore.collection("reportes")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get().await()
+
+            val count = snapshot.documents.count { doc ->
+                val uid   = doc.getString("uid") ?: ""
+                val usuId = doc.getString("usuarioId") ?: ""
+                uid == usuarioId || usuId == usuarioId
+            }
+
+            Result.success(count)
         } catch (e: Exception) {
             Result.failure(e)
         }
